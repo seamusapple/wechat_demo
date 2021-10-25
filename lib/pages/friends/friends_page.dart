@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wechat_demo/pages/discover/discover_child_page.dart';
 import 'package:wechat_demo/pages/friends/friends_data.dart';
+import 'package:wechat_demo/pages/friends/index_bar.dart';
 
 import '../const.dart';
 
@@ -76,9 +77,18 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
       ),
       body: Container(
         color: themeColor,
-        child: ListView.builder(
-            itemCount: addressBooks.length + datas.length,
-            itemBuilder: _cellForRow
+        child: Stack(
+          children: [
+            Container(
+              child: ListView.builder(
+                  itemCount: addressBooks.length + datas.length,
+                  itemBuilder: _cellForRow
+              ),
+            ),
+            IndexBar(indexBarCallBack: (String str) {
+              print('点击了${str}');
+            }),
+          ],
         ),
       ),
     );
