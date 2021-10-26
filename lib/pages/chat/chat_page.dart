@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:wechat_demo/pages/chat/search_cell.dart';
 import '../const.dart';
 import 'package:http/http.dart' as http;
 import 'chat.dart';
@@ -20,27 +21,31 @@ class _ChatPageState extends State<ChatPage>
   bool _cancelConnect = false;
 
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
     // getData();
-    getData().then((List<Chat>? value) {
-      if (!_cancelConnect) {
-        setState(() {
-          _chatList = value!;
+    getData()
+        .then((List<Chat>? value) {
+          if (!_cancelConnect) {
+            setState(() {
+              _chatList = value!;
+            });
+          }
+        })
+        .catchError((onError) {
+          print(onError);
+        })
+        .whenComplete(() {
+          print('完成');
+        })
+        .timeout(Duration(milliseconds: 3000))
+        .catchError((timeoutError) {
+          _cancelConnect = true;
+          print('timeoutErrot: ${timeoutError}');
         });
-      }
-    }).catchError((onError) {
-      print(onError);
-    }).whenComplete(() {
-      print('完成');
-    }).timeout(Duration(milliseconds: 1000)).catchError((timeoutError) {
-      _cancelConnect = true;
-      print('timeoutErrot: ${timeoutError}');
-    });
   }
 
   @override
@@ -138,23 +143,8 @@ class _ChatPageState extends State<ChatPage>
                 child: CircularProgressIndicator(),
               )
             : ListView.builder(
-                itemCount: _chatList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(_chatList[index].name),
-                    subtitle: Container(
-                      height: 20,
-                      width: 20,
-                      child: Text(
-                        _chatList[index].message,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(_chatList[index].imageUrl),
-                    ),
-                  );
-                },
+                itemCount: _chatList.length + 1,
+                itemBuilder: _listViewItemBuilder,
               ),
       ),
       // FutureBuilder(
@@ -191,5 +181,26 @@ class _ChatPageState extends State<ChatPage>
       //   },
       // ),
     );
+  }
+
+  Widget _listViewItemBuilder(BuildContext context, int index) {
+    if (index == 0) {
+      return SearchCell(datas: _chatList,);
+    } else {
+      return ListTile(
+        title: Text(_chatList[index-1].name),
+        subtitle: Container(
+          height: 20,
+          width: 20,
+          child: Text(
+            _chatList[index-1].message,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        leading: CircleAvatar(
+          backgroundImage: NetworkImage(_chatList[index-1].imageUrl),
+        ),
+      );
+    }
   }
 }
