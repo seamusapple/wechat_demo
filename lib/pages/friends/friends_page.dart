@@ -15,6 +15,10 @@ class FriendsPage extends StatefulWidget {
 class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
+  final ScrollController _scrollController = ScrollController();
+  final Map _groupOffsetMap = {'🔍' : 0,};
+  double _maxScrollExtend = double.maxFinite;
+
   @override
   void initState() {
     super.initState();
@@ -22,6 +26,20 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
     datas.sort((Friends a, Friends b) {
       return a.indexLetter!.compareTo(b.indexLetter!);
     });
+
+    var groupOffset = 54.0 * addressBooks.length;
+    for (int i = 0; i < datas.length; i++) {
+      // 第一个肯定有组标题
+      if (i < 1) {
+        _groupOffsetMap.addAll({datas[i].indexLetter! : groupOffset});
+        groupOffset += 30 + 54.0;
+      } else if (datas[i].indexLetter == datas[i - 1].indexLetter) {
+        groupOffset += 54.0;
+      } else {
+        _groupOffsetMap.addAll({datas[i].indexLetter! : groupOffset});
+        groupOffset += 30 + 54.0;
+      }
+    }
   }
 
   @override
@@ -80,13 +98,36 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
         child: Stack(
           children: [
             Container(
-              child: ListView.builder(
-                  itemCount: addressBooks.length + datas.length,
-                  itemBuilder: _cellForRow
+              child: NotificationListener(
+                onNotification: (ScrollNotification note) {
+                  _maxScrollExtend = note.metrics.maxScrollExtent.toDouble();
+                  return true;
+                },
+                child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: addressBooks.length + datas.length,
+                    itemBuilder: _cellForRow
+                ),
               ),
             ),
             IndexBar(indexBarCallBack: (String str) {
-              print('点击了${str}');
+              if (_groupOffsetMap[str] != null) {
+                const duration = Duration(milliseconds: 10);
+                const curve = Curves.easeIn;
+                if (_groupOffsetMap[str] < _maxScrollExtend) {
+                  _scrollController.animateTo(
+                      _groupOffsetMap[str],
+                      duration: duration,
+                      curve: curve
+                  );
+                } else {
+                  _scrollController.animateTo(
+                      _maxScrollExtend,
+                      duration: duration,
+                      curve: curve
+                  );
+                }
+              }
             }),
           ],
         ),
