@@ -14,16 +14,15 @@ class RootPage extends StatefulWidget {
 class _RootPageState extends State<RootPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  int _currentIndex = 1;
+  int _currentIndex = 0;
+  final _pageController = PageController(initialPage: 0);
 
   void _onTap(int index) {
     _currentIndex = index;
-    setState(() {
-
-    });
+    setState(() {});
+    _pageController.jumpToPage(index);
   }
 
-  List<Widget> pageArray = [const ChatPage(), const FriendsPage(), const DiscoverPage(), const MinePage()];
   List<BottomNavigationBarItem> navigationBarItemArray = [
     const BottomNavigationBarItem(
         icon: Image(width: 20, height: 20, image: AssetImage('images/tabbar_chat.png'),),
@@ -60,6 +59,13 @@ class _RootPageState extends State<RootPage> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> pageArray = [
+      const ChatPage(),
+      const FriendsPage(),
+      const DiscoverPage(),
+      const MinePage()
+    ];
+
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
@@ -69,7 +75,16 @@ class _RootPageState extends State<RootPage> with SingleTickerProviderStateMixin
         onTap: _onTap,
         items: navigationBarItemArray,
       ),
-      body: pageArray[_currentIndex],
+      body: PageView(
+        // onPageChanged: (int index) {
+        //   setState(() {
+        //     _currentIndex = index;
+        //   });
+        // },
+        physics: NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        children: pageArray,
+      ),
     );
   }
 }

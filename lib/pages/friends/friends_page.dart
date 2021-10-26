@@ -12,7 +12,7 @@ class FriendsPage extends StatefulWidget {
   _FriendsPageState createState() => _FriendsPageState();
 }
 
-class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStateMixin {
+class _FriendsPageState extends State<FriendsPage> with AutomaticKeepAliveClientMixin {
   late AnimationController _controller;
 
   final ScrollController _scrollController = ScrollController();
@@ -20,9 +20,11 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
   double _maxScrollExtend = double.maxFinite;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
     datas.sort((Friends a, Friends b) {
       return a.indexLetter!.compareTo(b.indexLetter!);
     });
@@ -69,6 +71,7 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: themeColor,
